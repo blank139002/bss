@@ -1,3 +1,5 @@
+print("New script version loaded - 2025-03-21") -- Добавляем отладочную строку
+
 local bsslib = {}
 
 function bsslib.getInventory()
@@ -67,7 +69,6 @@ local function createGUI()
     ScreenGui.Name = "SimpleBSSGUI"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-    -- Кнопка скрытия/показа GUI вверху экрана
     local ToggleButton = Instance.new("TextButton")
     ToggleButton.Name = "ToggleGUIButton"
     ToggleButton.Size = UDim2.new(0, 50, 0, 30)
@@ -170,7 +171,6 @@ local function createGUI()
 
     local UserInputService = game:GetService("UserInputService")
     
-    -- Логика перетаскивания для ToggleButton
     local draggingToggle = false
     local dragStartToggle = nil
     local startPosToggle = nil
@@ -201,7 +201,6 @@ local function createGUI()
         end
     end)
 
-    -- Логика перетаскивания для основного окна
     local dragging = false
     local dragStart = nil
     local startPos = nil
