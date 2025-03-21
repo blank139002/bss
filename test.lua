@@ -1,4 +1,3 @@
--- Код bsslib напрямую в скрипте
 local bsslib = {}
 
 function bsslib.getInventory()
@@ -53,31 +52,40 @@ function bsslib.Godmode(boolean)
     end
 end
 
--- Настройки скорости (аналогично Kocmoc)
 getgenv().kocmoc = {
     toggles = {
-        loopspeed = false, -- Переключатель для применения скорости
+        loopspeed = false,
     },
     vars = {
-        walkspeed = 70, -- Скорость по умолчанию
-        defaultWalkspeed = 40, -- Скорость после выключения (изменено на 40)
+        walkspeed = 70,
+        defaultWalkspeed = 40,
     }
 }
 
--- Простая библиотека GUI (основана на Roblox UI) с перетаскиванием и крестиком
 local function createGUI()
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "SimpleBSSGUI"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
+    -- Кнопка скрытия/показа GUI вверху экрана
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Name = "ToggleGUIButton"
+    ToggleButton.Size = UDim2.new(0, 50, 0, 30)
+    ToggleButton.Position = UDim2.new(0.5, -25, 0, 40)
+    ToggleButton.Text = "Hide"
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleButton.Font = Enum.Font.SourceSansBold
+    ToggleButton.TextSize = 16
+    ToggleButton.Parent = ScreenGui
+
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 200, 0, 320) -- Увеличиваем высоту для новой кнопки
+    Frame.Size = UDim2.new(0, 200, 0, 320)
     Frame.Position = UDim2.new(0.5, -100, 0.5, -160)
     Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     Frame.BorderSizePixel = 0
     Frame.Parent = ScreenGui
 
-    -- Заголовок (будет использоваться для перетаскивания)
     local Title = Instance.new("TextLabel")
     Title.Size = UDim2.new(1, -30, 0, 30)
     Title.Position = UDim2.new(0, 0, 0, 0)
@@ -89,7 +97,6 @@ local function createGUI()
     Title.TextSize = 20
     Title.Parent = Frame
 
-    -- Кнопка-крестик для закрытия
     local CloseButton = Instance.new("TextButton")
     CloseButton.Size = UDim2.new(0, 30, 0, 30)
     CloseButton.Position = UDim2.new(1, -30, 0, 0)
@@ -121,7 +128,6 @@ local function createGUI()
     ViciousButton.TextSize = 18
     ViciousButton.Parent = Frame
 
-    -- Кнопка для Stick Bug
     local StickBugButton = Instance.new("TextButton")
     StickBugButton.Size = UDim2.new(0, 180, 0, 40)
     StickBugButton.Position = UDim2.new(0, 10, 0, 140)
@@ -132,7 +138,6 @@ local function createGUI()
     StickBugButton.TextSize = 18
     StickBugButton.Parent = Frame
 
-    -- Кнопка для Mondo Chick
     local MondoChickButton = Instance.new("TextButton")
     MondoChickButton.Size = UDim2.new(0, 180, 0, 40)
     MondoChickButton.Position = UDim2.new(0, 10, 0, 190)
@@ -143,7 +148,6 @@ local function createGUI()
     MondoChickButton.TextSize = 18
     MondoChickButton.Parent = Frame
 
-    -- Переключатель для активации скорости
     local SpeedToggle = Instance.new("TextButton")
     SpeedToggle.Size = UDim2.new(0, 180, 0, 30)
     SpeedToggle.Position = UDim2.new(0, 10, 0, 240)
@@ -154,7 +158,6 @@ local function createGUI()
     SpeedToggle.TextSize = 16
     SpeedToggle.Parent = Frame
 
-    -- Слайдер для изменения скорости
     local SpeedSlider = Instance.new("TextBox")
     SpeedSlider.Size = UDim2.new(0, 180, 0, 30)
     SpeedSlider.Position = UDim2.new(0, 10, 0, 280)
@@ -165,8 +168,40 @@ local function createGUI()
     SpeedSlider.TextSize = 16
     SpeedSlider.Parent = Frame
 
-    -- Логика перетаскивания
     local UserInputService = game:GetService("UserInputService")
+    
+    -- Логика перетаскивания для ToggleButton
+    local draggingToggle = false
+    local dragStartToggle = nil
+    local startPosToggle = nil
+
+    ToggleButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            draggingToggle = true
+            dragStartToggle = input.Position
+            startPosToggle = ToggleButton.Position
+        end
+    end)
+
+    ToggleButton.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            draggingToggle = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if draggingToggle and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStartToggle
+            ToggleButton.Position = UDim2.new(
+                startPosToggle.X.Scale,
+                startPosToggle.X.Offset + delta.X,
+                startPosToggle.Y.Scale,
+                startPosToggle.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    -- Логика перетаскивания для основного окна
     local dragging = false
     local dragStart = nil
     local startPos = nil
@@ -197,13 +232,11 @@ local function createGUI()
         end
     end)
 
-    return ScreenGui, AutofarmButton, ViciousButton, StickBugButton, MondoChickButton, CloseButton, SpeedToggle, SpeedSlider
+    return ScreenGui, AutofarmButton, ViciousButton, StickBugButton, MondoChickButton, CloseButton, SpeedToggle, SpeedSlider, ToggleButton
 end
 
--- Создаем GUI
-local gui, autofarmButton, viciousButton, stickBugButton, mondoChickButton, closeButton, speedToggle, speedSlider = createGUI()
+local gui, autofarmButton, viciousButton, stickBugButton, mondoChickButton, closeButton, speedToggle, speedSlider, toggleButton = createGUI()
 
--- Переменные состояния
 local isAutofarming = false
 local isKillingVicious = false
 local isKillingStickBug = false
@@ -211,9 +244,9 @@ local isKillingMondoChick = false
 local viciousPlatform = nil
 local stickBugPlatform = nil
 local mondoChickPlatform = nil
-local hasMovedToPlatform = false -- Флаг для отслеживания, переместился ли персонаж на платформу
+local hasMovedToPlatform = false
+local isGUIVisible = true
 
--- Функция для создания платформы над Vicious Bee, Stick Bug или Mondo Chick
 local function createPlatform(position, platformName)
     local existingPlatform
     if platformName == "ViciousPlatform" then
@@ -228,17 +261,15 @@ local function createPlatform(position, platformName)
     end
     local platform = Instance.new("Part")
     platform.Name = platformName
-    platform.Size = Vector3.new(20, 2, 20) -- Размер платформы 20x1x20
-    -- Увеличиваем высоту для Stick Bug и Mondo Chick
+    platform.Size = Vector3.new(20, 2, 20)
     local height = (platformName == "StickBugPlatform" or platformName == "MondoChickPlatform") and 15 or 5
-    platform.Position = position + Vector3.new(0, height, 0) -- Платформа на высоте 15 для Stick Bug и Mondo Chick, 5 для Vicious Bee
+    platform.Position = position + Vector3.new(0, height, 0)
     platform.Anchored = true
-    -- Настройки внешнего вида платформы
     if platformName == "StickBugPlatform" or platformName == "MondoChickPlatform" then
-        platform.Transparency = 0.5 -- Полупрозрачная платформа
-        platform.BrickColor = BrickColor.new("Medium stone grey") -- Серая платформа
+        platform.Transparency = 0.5
+        platform.BrickColor = BrickColor.new("Medium stone grey")
     else
-        platform.Transparency = 1 -- Невидимая платформа для Vicious Bee
+        platform.Transparency = 1
     end
     platform.CanCollide = true
     platform.Parent = game.Workspace
@@ -252,7 +283,6 @@ local function createPlatform(position, platformName)
     return platform
 end
 
--- Функция для удаления платформы
 local function removePlatform(platformName)
     if platformName == "ViciousPlatform" and viciousPlatform then
         viciousPlatform:Destroy()
@@ -266,18 +296,15 @@ local function removePlatform(platformName)
     end
 end
 
--- Функция для сброса скорости персонажа
 local function resetWalkSpeed()
     local player = game.Players.LocalPlayer
     if player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.WalkSpeed = kocmoc.vars.defaultWalkspeed -- Сбрасываем до 40
+        player.Character.Humanoid.WalkSpeed = kocmoc.vars.defaultWalkspeed
     end
 end
 
--- Функция автофарма
 local function startAutofarm()
     while isAutofarming and task.wait(0.1) do
-        -- Получаем ближайший цветок
         local closestFlower = nil
         local minDistance = math.huge
         for _, flower in pairs(game:GetService("Workspace").Flowers:GetChildren()) do
@@ -288,11 +315,9 @@ local function startAutofarm()
             end
         end
 
-        -- Двигаемся к цветку и собираем пыльцу
         if closestFlower then
             game.Players.LocalPlayer.Character:MoveTo(closestFlower.Position)
             task.wait(0.5)
-            -- Симулируем сбор пыльцы
             if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") then
                 local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
                 if tool:FindFirstChild("ClickEvent") then
@@ -301,24 +326,21 @@ local function startAutofarm()
             end
         end
 
-        -- Проверяем заполненность мешка и конвертируем
         local pollen = bsslib.Pollen()
         local maxPollen = game.Players.LocalPlayer.CoreStats.Capacity.Value
-        if pollen >= maxPollen * 0.9 then -- Конвертируем, если мешок заполнен на 90%
+        if pollen >= maxPollen * 0.9 then
             game:GetService("ReplicatedStorage").Events.PlayerHiveCommand:FireServer("ToggleHoneyMaking")
-            task.wait(5) -- Ждем завершения конверсии
-            game:GetService("ReplicatedStorage").Events.PlayerHiveCommand:FireServer("ToggleHoneyMaking") -- Выключаем конверсию
+            task.wait(5)
+            game:GetService("ReplicatedStorage").Events.PlayerHiveCommand:FireServer("ToggleHoneyMaking")
         end
     end
 end
 
--- Функция проверки и убийства Vicious Bee с платформой
 local function checkAndKillVicious()
     while isKillingVicious and task.wait(0.1) do
         local viciousActive = false
         local viciousPosition = nil
 
-        -- Проверяем наличие Vicious Bee
         for _, particle in pairs(game:GetService("Workspace").Particles:GetChildren()) do
             if string.find(particle.Name, "Vicious") then
                 viciousActive = true
@@ -327,29 +349,18 @@ local function checkAndKillVicious()
             end
         end
 
-        -- Проверяем кулдаун спавнера через bsslib
         local cooldown = bsslib.GetCooldown("Vicious Bee")
         if viciousActive and viciousPosition then
-            -- Создаем платформу над Vicious Bee
             local platform = createPlatform(viciousPosition, "ViciousPlatform")
-            
-            -- Перемещаем персонажа на платформу
             local player = game.Players.LocalPlayer
             local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             if humanoidRootPart then
-                -- Телепортируем персонажа на платформу
                 humanoidRootPart.CFrame = CFrame.new(platform.Position + Vector3.new(0, 4, 0))
-                
-                -- Случайное перемещение по платформе
                 local platformSize = platform.Size
                 local randomX = math.random(-platformSize.X / 2, platformSize.X / 2)
                 local randomZ = math.random(-platformSize.Z / 2, platformSize.Z / 2)
                 local targetPosition = platform.Position + Vector3.new(randomX, 2, randomZ)
-                
-                -- Двигаемся к случайной точке на платформе
                 game.Players.LocalPlayer.Character:MoveTo(targetPosition)
-                
-                -- Атака Vicious Bee
                 if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") then
                     local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
                     if tool:FindFirstChild("ClickEvent") then
@@ -358,23 +369,19 @@ local function checkAndKillVicious()
                 end
             end
         else
-            -- Если Vicious Bee нет, удаляем платформу
             removePlatform("ViciousPlatform")
         end
     end
-    -- После завершения цикла удаляем платформу
     removePlatform("ViciousPlatform")
 end
 
--- Функция проверки и убийства Stick Bug с платформой
 local function checkAndKillStickBug()
-    hasMovedToPlatform = false -- Сбрасываем флаг при запуске
+    hasMovedToPlatform = false
     while isKillingStickBug and task.wait(0.1) do
         local stickBugActive = false
         local stickBugPosition = nil
         local stickBug = nil
 
-        -- Проверяем наличие Stick Bug
         for _, monster in pairs(game:GetService("Workspace").Monsters:GetChildren()) do
             if string.find(monster.Name, "Stick Bug") then
                 stickBugActive = true
@@ -385,33 +392,21 @@ local function checkAndKillStickBug()
         end
 
         if stickBugActive and stickBugPosition then
-            -- Создаем или обновляем платформу над Stick Bug
             local platform = createPlatform(stickBugPosition, "StickBugPlatform")
-            
-            -- Обновляем позицию платформы, если Stick Bug движется
             platform.Position = stickBugPosition + Vector3.new(0, 15, 0)
-            
-            -- Перемещаем персонажа на платформу
             local player = game.Players.LocalPlayer
             local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
             if humanoidRootPart and humanoid then
-                -- Плавно перемещаем персонажа на платформу только один раз
                 if not hasMovedToPlatform then
                     local startPosition = platform.Position + Vector3.new(0, 2, 0)
                     game.Players.LocalPlayer.Character:MoveTo(startPosition)
-                    task.wait(2) -- Даем время персонажу добраться до платформы
+                    task.wait(2)
                     hasMovedToPlatform = true
                 end
-                
-                -- Убедимся, что персонаж не "летает"
-                humanoid.PlatformStand = false -- Отключаем PlatformStand
-
-                -- Держим персонажа в центре платформы
+                humanoid.PlatformStand = false
                 local centerPosition = platform.Position + Vector3.new(0, 2, 0)
                 game.Players.LocalPlayer.Character:MoveTo(centerPosition)
-                
-                -- Атака Stick Bug (ускоряем)
                 if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") then
                     local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
                     if tool:FindFirstChild("ClickEvent") then
@@ -420,25 +415,21 @@ local function checkAndKillStickBug()
                 end
             end
         else
-            -- Если Stick Bug нет, удаляем платформу
             removePlatform("StickBugPlatform")
-            hasMovedToPlatform = false -- Сбрасываем флаг, если Stick Bug исчез
+            hasMovedToPlatform = false
         end
     end
-    -- После завершения цикла удаляем платформу
     removePlatform("StickBugPlatform")
-    hasMovedToPlatform = false -- Сбрасываем флаг при завершении
+    hasMovedToPlatform = false
 end
 
--- Функция проверки и убийства Mondo Chick с платформой
 local function checkAndKillMondoChick()
-    hasMovedToPlatform = false -- Сбрасываем флаг при запуске
+    hasMovedToPlatform = false
     while isKillingMondoChick and task.wait(0.1) do
         local mondoChickActive = false
         local mondoChickPosition = nil
         local mondoChick = nil
 
-        -- Проверяем наличие Mondo Chick
         for _, monster in pairs(game:GetService("Workspace").Monsters:GetChildren()) do
             if string.find(monster.Name, "Mondo Chick") then
                 mondoChickActive = true
@@ -449,33 +440,21 @@ local function checkAndKillMondoChick()
         end
 
         if mondoChickActive and mondoChickPosition then
-            -- Создаем или обновляем платформу над Mondo Chick
             local platform = createPlatform(mondoChickPosition, "MondoChickPlatform")
-            
-            -- Обновляем позицию платформы, если Mondo Chick движется
             platform.Position = mondoChickPosition + Vector3.new(0, 24, 0)
-            
-            -- Перемещаем персонажа на платформу
             local player = game.Players.LocalPlayer
             local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
             if humanoidRootPart and humanoid then
-                -- Плавно перемещаем персонажа на платформу только один раз
                 if not hasMovedToPlatform then
                     local startPosition = platform.Position + Vector3.new(0, 2, 0)
                     game.Players.LocalPlayer.Character:MoveTo(startPosition)
-                    task.wait(2) -- Даем время персонажу добраться до платформы
+                    task.wait(2)
                     hasMovedToPlatform = true
                 end
-                
-                -- Убедимся, что персонаж не "летает"
-                humanoid.PlatformStand = false -- Отключаем PlatformStand
-
-                -- Держим персонажа в центре платформы
+                humanoid.PlatformStand = false
                 local centerPosition = platform.Position + Vector3.new(0, 2, 0)
                 game.Players.LocalPlayer.Character:MoveTo(centerPosition)
-                
-                -- Атака Mondo Chick (ускоряем)
                 if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") then
                     local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
                     if tool:FindFirstChild("ClickEvent") then
@@ -484,17 +463,14 @@ local function checkAndKillMondoChick()
                 end
             end
         else
-            -- Если Mondo Chick нет, удаляем платформу
             removePlatform("MondoChickPlatform")
-            hasMovedToPlatform = false -- Сбрасываем флаг, если Mondo Chick исчез
+            hasMovedToPlatform = false
         end
     end
-    -- После завершения цикла удаляем платформу
     removePlatform("MondoChickPlatform")
-    hasMovedToPlatform = false -- Сбрасываем флаг при завершении
+    hasMovedToPlatform = false
 end
 
--- Обработчики кнопок
 autofarmButton.MouseButton1Click:Connect(function()
     isAutofarming = not isAutofarming
     autofarmButton.Text = "Autofarm: " .. (isAutofarming and "ON" or "OFF")
@@ -511,7 +487,7 @@ viciousButton.MouseButton1Click:Connect(function()
     if isKillingVicious then
         task.spawn(checkAndKillVicious)
     else
-        removePlatform("ViciousPlatform") -- Удаляем платформу при отключении
+        removePlatform("ViciousPlatform")
     end
 end)
 
@@ -522,8 +498,8 @@ stickBugButton.MouseButton1Click:Connect(function()
     if isKillingStickBug then
         task.spawn(checkAndKillStickBug)
     else
-        removePlatform("StickBugPlatform") -- Удаляем платформу при отключении
-        hasMovedToPlatform = false -- Сбрасываем флаг при отключении
+        removePlatform("StickBugPlatform")
+        hasMovedToPlatform = false
     end
 end)
 
@@ -534,35 +510,39 @@ mondoChickButton.MouseButton1Click:Connect(function()
     if isKillingMondoChick then
         task.spawn(checkAndKillMondoChick)
     else
-        removePlatform("MondoChickPlatform") -- Удаляем платформу при отключении
-        hasMovedToPlatform = false -- Сбрасываем флаг при отключении
+        removePlatform("MondoChickPlatform")
+        hasMovedToPlatform = false
     end
 end)
 
--- Обработчик переключателя скорости
 speedToggle.MouseButton1Click:Connect(function()
     kocmoc.toggles.loopspeed = not kocmoc.toggles.loopspeed
     speedToggle.Text = "Loop Speed: " .. (kocmoc.toggles.loopspeed and "ON" or "OFF")
     speedToggle.BackgroundColor3 = kocmoc.toggles.loopspeed and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(70, 70, 70)
     if not kocmoc.toggles.loopspeed then
-        resetWalkSpeed() -- Сбрасываем скорость, когда переключатель выключен
+        resetWalkSpeed()
     end
 end)
 
--- Обработчик слайдера скорости
 speedSlider.FocusLost:Connect(function(enterPressed)
     if enterPressed then
         local newSpeed = tonumber(speedSlider.Text)
-        if newSpeed and newSpeed >= 0 and newSpeed <= 120 then -- Ограничение скорости (0-120)
+        if newSpeed and newSpeed >= 0 and newSpeed <= 120 then
             kocmoc.vars.walkspeed = newSpeed
             speedSlider.Text = tostring(newSpeed)
         else
-            speedSlider.Text = tostring(kocmoc.vars.walkspeed) -- Возвращаем старое значение, если ввод некорректен
+            speedSlider.Text = tostring(kocmoc.vars.walkspeed)
         end
     end
 end)
 
--- Применение скорости (аналогично Kocmoc)
+toggleButton.MouseButton1Click:Connect(function()
+    isGUIVisible = not isGUIVisible
+    toggleButton.Text = isGUIVisible and "Hide" or "Show"
+    toggleButton.BackgroundColor3 = isGUIVisible and Color3.fromRGB(70, 70, 70) or Color3.fromRGB(50, 200, 50)
+    gui.Frame.Visible = isGUIVisible
+end)
+
 game:GetService('RunService').Heartbeat:Connect(function()
     if kocmoc.toggles.loopspeed then
         local player = game.Players.LocalPlayer
@@ -572,24 +552,20 @@ game:GetService('RunService').Heartbeat:Connect(function()
     end
 end)
 
--- Обработчик кнопки-крестика
 closeButton.MouseButton1Click:Connect(function()
-    -- Отключаем все функции
     isAutofarming = false
     isKillingVicious = false
     isKillingStickBug = false
     isKillingMondoChick = false
-    kocmoc.toggles.loopspeed = false -- Отключаем применение скорости
-    resetWalkSpeed() -- Сбрасываем скорость
+    kocmoc.toggles.loopspeed = false
+    resetWalkSpeed()
     removePlatform("ViciousPlatform")
     removePlatform("StickBugPlatform")
     removePlatform("MondoChickPlatform")
-    hasMovedToPlatform = false -- Сбрасываем флаг
-    -- Удаляем GUI
+    hasMovedToPlatform = false
     gui:Destroy()
 end)
 
--- Анти-AFK
 game:GetService("Players").LocalPlayer.Idled:Connect(function()
     game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
     task.wait(1)
